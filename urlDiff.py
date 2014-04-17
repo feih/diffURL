@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-from urlparse import urlparse
+import urlparse
 
 if len(sys.argv) == 1:
     print
@@ -17,9 +17,12 @@ compare  = sys.argv[2]
 #print baseline
 #print compare
 
-b = urlparse(baseline);
-c = urlparse(compare);
+b = urlparse.urlparse(baseline);
+c = urlparse.urlparse(compare);
 
+#schema
+base_schema = b.scheme
+compare_schema = c.scheme
 #hostname
 base_host = b.hostname
 compare_host = c.hostname
@@ -33,20 +36,19 @@ compare_path = c.path;
 base_frag = b.fragment;
 compare_frag = c.fragment;
 
-baseline = baseline.split('?')[1]
-compare = compare.split('?')[1]
-
-base_split = baseline.split('&')
-comp_split = compare.split('&')
+base_params = b.query;
+comp_params = c.query;
 
 D = dict()
 
-def store(splitted, isBase):
+def store(params, isBase):
+    params = urlparse.parse_qs(params)
+    #print params
 
-    for kv  in splitted:
+    for k  in params:
 	#print kv
-	key = kv.split('=')[0]
-	value = kv.split('=')[1]
+	key = k
+	value = params[key]
 	#print key, value
 	a = ""
 	b = ""
@@ -56,24 +58,35 @@ def store(splitted, isBase):
 	    a = value
 	else:
 	    b = value
+        # store it back
 	D[key] = a,b
 
-store(base_split, 1)
-store(comp_split, 0)
+store(base_params, 1)
+store(comp_params, 0)
 
 #print D
 
+def printer(param, base, comp):
+    if base==None:
+        base = ""
+    if comp==None:
+        comp = ""
+    print '%s %s %s' % (param, base, comp)
+
+if base_schema != compare_schema:
+    printer("scheme", base_schema, compare_schema);
 if base_host != compare_host:
-    print 'host %s %s' % (base_host, compare_host);
+    printer("host", base_host, compare_host);
 if base_port != compare_port:
-    print 'port %s %s' % (base_port, compare_port);
+    printer("port", base_port, compare_port);
 if base_path != compare_path:
-    print 'path %s %s' % (base_path, compare_path);
+    printer("path", base_path, compare_path);
 if base_frag != compare_frag:
-    print 'fragment %s %s' % (base_frag, compare_frag);
+    printer("fragment", base_frag, compare_frag);
 
 
 for key, value in D.iteritems():
     base, comp = value
     if base != comp:
-	print '%s %s %s' % (key, base, comp)
+	print '%s %s %s' % (key, base[0], comp[0])
+print # to test ajax timeout, comment this out

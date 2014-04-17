@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title>Find difference between two URLs</title>
 
     <!-- Bootstrap -->
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
@@ -17,7 +17,18 @@
     <![endif]-->
   </head>
   <body>
-    <h3>URL Diff tool</h3>
+    <h3>&nbsp;URL Diff tool <span style="font-size: 10pt" class="label label-default">Beta</span></h3>
+
+    <h5 style="margin-top:20px; margin-bottom:20px">&nbsp;&nbsp;Simply copy paste two URLs here and let the tool to do the rest</h5>
+    <h5 style="margin-top:3px; margin-bottom:3px">&nbsp;&nbsp;A URL should ideally comform to this definition:</h5>
+    <h5 style="margin-top:3px; margin-bottom:20px">&nbsp;&nbsp;
+        <span class="label label-default">scheme://</span>
+        <span class="label label-primary">host</span>
+        <span class="label label-success">:port</span>
+        <span class="label label-info">path</span>
+        <span class="label label-warning">parameters</span>
+        <span class="label label-danger">#fragment</span>
+    </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -52,18 +63,23 @@
       {
         var str = '<table class="table table-hover">';
         str += '<tr><th>Parameter</th><th>URL A</th><th>URL B</th></tr>';
-        alert("response: " + xmlhttp.responseText);
-        var diffs = xmlhttp.responseText.split("\n");
-        var i = 0;
-        while (i < diffs.length) {
-          var res = diffs[i].split(" ");
-          if (res[0] != "") {
-            str += '<tr><td>'+ res[0] + '</td><td>' + res[1] + '</td><td>' + res[2] + '</td></tr>';
-          }
-          i++;
+        //alert("response:" + xmlhttp.responseText + "AA");
+        if (xmlhttp.responseText == "\n")  {
+            var emptyStr = '<div class="alert alert-success" align="center">hmm..they are the same</div>';
+            document.getElementById("tableHolder").innerHTML=emptyStr;
+        } else {
+            var diffs = xmlhttp.responseText.split("\n");
+            var i = 0;
+            while (i < diffs.length) {
+              var res = diffs[i].split(" ");
+              if (res[0] != "") {
+                str += '<tr><td>'+ res[0] + '</td><td>' + res[1] + '</td><td>' + res[2] + '</td></tr>';
+              }
+              i++;
+            }
+            str += '</table>';
+            document.getElementById("tableHolder").innerHTML=str;
         }
-        str += '</table>';
-        document.getElementById("tableHolder").innerHTML=str;
       }
     }
 
@@ -71,9 +87,21 @@
 
     //alert("urla: " + document.getElementById('urla').value );
 
-    xmlhttp.open("POST", "index", false);
+    xmlhttp.open("POST", "index", true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     xmlhttp.send('urla=' + encodeURIComponent(document.getElementById('urla').value) + '&urlb=' + encodeURIComponent(document.getElementById('urlb').value));
+
+    function ajaxTimeout(){
+      xmlhttp.abort();
+      //alert('timeout!');
+        if (document.getElementById("tableHolder").innerHTML=="") {
+            var emptyStr = '<div class="alert alert-danger" align="center">this is embarassing but the server doesn\'t seem to respond..</div>';
+            document.getElementById("tableHolder").innerHTML=emptyStr;
+        }
+    }
+
+    var xmlHttpTimeout=setTimeout(ajaxTimeout, 2000);
+    //alert("set timeout");
   }
 
 /*
@@ -101,7 +129,7 @@
   */
 </script>
 
-  <div class="row">
+  <div class="row" style="margin-top:30px">
     <div class="col-md-1"></div>
 
     <div class="col-md-5">
@@ -118,12 +146,17 @@
 
   <ol class="breadcrumb">
   <div align="center">
-    
       <button type="submit" class="btn btn-primary" onclick="ajaxFunction()">Diff</button>
   </div>
   </ol>
 
-  <div id="tableHolder"></div>  
+  <div id="tableHolder"></div>
+
+  <div align="right" style="position:absolute;bottom:0;width:100%;height:60px;">
+      <div id="clustrmaps-widget"></div>
+      <script type="text/javascript">var _clustrmaps = {'url' : 'urldiff.com', 'user' : 1140240, 'server' : '2', 'id' : 'clustrmaps-widget', 'version' : 1, 'date' : '2014-04-17', 'lang' : 'en', 'corners' : 'square' };(function (){ var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = 'http://www2.clustrmaps.com/counter/map.js'; var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x);})();</script>
+      <noscript><a href="http://www2.clustrmaps.com/user/e8d116610"><img src="http://www2.clustrmaps.com/stats/maps-no_clusters/urldiff.com-thumb.jpg" alt="Locations of visitors to this page" /></a></noscript>
+  </div>
 
 </body>
 
